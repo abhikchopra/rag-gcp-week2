@@ -1,25 +1,31 @@
 import vertexai
 from vertexai.language_models import TextEmbeddingModel
 
-PROJECT_ID = "project-d97e020a-4925-4faa-a6c"
-REGION = "us-central1"
+vertexai.init(
+    project="project-d97e020a-4925-4faa-a6c",
+    location="us-central1"
+)
 
-vertexai.init(project=PROJECT_ID, location=REGION)
-
-# Load model once (important optimization)
 model = TextEmbeddingModel.from_pretrained("text-embedding-005")
 
 
 def get_embedding(text: str):
     """
-    Single text embedding (use for testing or queries)
+    Converts a single text string into a vector embedding.
     """
     return model.get_embeddings([text])[0].values
 
 
-def get_embeddings(texts: list[str]):
-    """
-    Batch embeddings (use for RAG ingestion - FAST + scalable)
-    """
-    response = model.get_embeddings(texts)
-    return [r.values for r in response]
+def get_embeddings(texts, batch_size=5):
+    all_embeddings = []
+
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+
+        # safety: truncate super long chunks
+        batch = [t[:2000] for t in batch]
+
+        response = model.get_embeddings(batch)
+        all_embeddings.extend([r.values for r in response])
+
+    return all_embeddings
