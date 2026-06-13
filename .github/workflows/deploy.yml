@@ -50,5 +50,4 @@ jobs:
           --image us-central1-docker.pkg.dev/rag-week2/rag-api/rag-api:${{ github.sha }} \
           --platform managed \
           --region us-central1 \
-          --service-account rag-week2-sa@rag-week2.iam.gserviceaccount.com \
-          --traffic latest=100
+          --service-account rag-week2-sa@rag-week2.iam.gserviceaccount.com
