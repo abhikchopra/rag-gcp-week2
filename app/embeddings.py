@@ -2,7 +2,7 @@ import vertexai
 from vertexai.language_models import TextEmbeddingModel
 
 vertexai.init(
-    project="project-d97e020a-4925-4faa-a6c",
+    project="rag-week2",
     location="us-central1"
 )
 
