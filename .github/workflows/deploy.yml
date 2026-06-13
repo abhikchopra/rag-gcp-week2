@@ -51,3 +51,4 @@ jobs:
           --platform managed \
           --region us-central1 \
           --service-account rag-week2-sa@rag-week2.iam.gserviceaccount.com
+          --traffic latest=100
