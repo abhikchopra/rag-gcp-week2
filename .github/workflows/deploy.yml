@@ -1,0 +1,53 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: rag-week2
+  REGION: us-central1
+  REPOSITORY: rag-api
+  SERVICE: rag-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/426864337178/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: rag-week2-sa@rag-week2.iam.gserviceaccount.com
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build and Push Image
+        run: |
+          docker buildx build \
+          --platform linux/amd64 \
+          -t us-central1-docker.pkg.dev/rag-week2/rag-api/rag-api:${{ github.sha }} \
+          --push .
+
+      - name: Deploy Cloud Run
+        run: |
+          gcloud run deploy rag-api \
+          --image us-central1-docker.pkg.dev/rag-week2/rag-api/rag-api:${{ github.sha }} \
+          --platform managed \
+          --region us-central1 \
+          --service-account rag-week2-sa@rag-week2.iam.gserviceaccount.com
